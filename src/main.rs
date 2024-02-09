@@ -1,4 +1,5 @@
 mod honeycomb_tracer;
+mod jaeger_tracer;
 
 use std::env;
 
@@ -26,7 +27,7 @@ async fn main() {
         .with_endpoint("https://api.honeycomb.io:443")
         .with_metadata(oltp_meta);
 
-    honeycomb_tracer::honeycomb_tracer(config, exporter).await;
+    honeycomb_tracer::honeycomb_tracer(config, exporter);
 
     let span = span!(Level::INFO, "read_message_from_sqs");
     let _enter = span.enter();

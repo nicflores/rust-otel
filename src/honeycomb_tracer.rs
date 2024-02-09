@@ -2,7 +2,7 @@ use opentelemetry_otlp::TonicExporterBuilder;
 use opentelemetry_sdk::trace as sdktrace;
 use tracing_subscriber::prelude::*;
 
-pub async fn honeycomb_tracer(config: sdktrace::Config, exporter: TonicExporterBuilder) {
+pub fn honeycomb_tracer(config: sdktrace::Config, exporter: TonicExporterBuilder) {
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
 
@@ -51,7 +51,7 @@ mod tests {
             .with_endpoint("https://api.honeycomb.io:443")
             .with_metadata(oltp_meta);
 
-        honeycomb_tracer(config, exporter).await;
+        honeycomb_tracer(config, exporter);
 
         let span = tracing::info_span!("test_span");
         let _enter = span.enter();
@@ -65,5 +65,7 @@ mod tests {
             span_context.trace_id().to_string(),
             "00000000000000000000000000000000",
         );
+
+        //global::shutdown_tracer_provider();
     }
 }
