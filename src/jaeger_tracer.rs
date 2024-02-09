@@ -3,7 +3,7 @@ use opentelemetry_sdk::trace as sdktrace;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
 
-#[allow(dead_code)]
+//#[allow(dead_code)]
 pub fn jaeger_tracer() {
     let exporter = opentelemetry_jaeger::new_agent_pipeline()
         .install_simple()
@@ -40,7 +40,5 @@ mod tests {
             span_context.trace_id().to_string(),
             "00000000000000000000000000000000",
         );
-
-        //global::shutdown_tracer_provider();
     }
 }

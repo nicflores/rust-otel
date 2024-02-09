@@ -1,21 +1,8 @@
 use opentelemetry_otlp::TonicExporterBuilder;
 use opentelemetry_sdk::trace as sdktrace;
 use tracing_subscriber::prelude::*;
-use tracing_subscriber::Registry;
 
-#[allow(dead_code)]
-pub fn jaeger_tracer() {
-    let exporter = opentelemetry_jaeger::new_agent_pipeline()
-        .install_simple()
-        .expect("Failed to create Jaeger exporter");
-
-    let telemetry = tracing_opentelemetry::layer().with_tracer(exporter);
-
-    let subscriber = Registry::default().with(telemetry);
-    tracing::subscriber::set_global_default(subscriber).expect("Setting default subscriber failed");
-}
-
-pub fn honeycomb_tracer(config: sdktrace::Config, exporter: TonicExporterBuilder) {
+pub async fn honeycomb_tracer(config: sdktrace::Config, exporter: TonicExporterBuilder) {
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
 
@@ -47,8 +34,8 @@ mod tests {
     use tonic::metadata::MetadataMap;
     use tracing_opentelemetry::OpenTelemetrySpanExt;
 
-    #[test]
-    fn honeycomb_tracer_generates_nonzero_trace_id() {
+    #[tokio::test]
+    async fn honeycomb_tracer_generates_nonzero_trace_id() {
         let honeycomb_key = env::var("HONEYCOMB_KEY").unwrap();
         let mut oltp_meta = MetadataMap::new();
         oltp_meta.insert("x-honeycomb-team", honeycomb_key.parse().unwrap());
@@ -64,7 +51,7 @@ mod tests {
             .with_endpoint("https://api.honeycomb.io:443")
             .with_metadata(oltp_meta);
 
-        honeycomb_tracer(config, exporter);
+        honeycomb_tracer(config, exporter).await;
 
         let span = tracing::info_span!("test_span");
         let _enter = span.enter();
