@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build_and_test:
+  cargo_test:
     name: Test
     runs-on: ubuntu-latest
     steps:
@@ -19,3 +19,12 @@ jobs:
         with:
           toolchain: stable
       - run: cargo test
+  cargo_run:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo run
